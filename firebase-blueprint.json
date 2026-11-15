@@ -1,0 +1,200 @@
+{
+  "entities": {
+    "GameConfig": {
+      "title": "GameConfig",
+      "description": "Global betting parameters, editable probability tiers, editable roulette prize amounts, bet scaling thresholds, and default countdown timer.",
+      "type": "object",
+      "properties": {
+        "minBetUnits": { "type": "integer" },
+        "maxBetThresholdUnits": { "type": "integer" },
+        "minBetWinPct": { "type": "number" },
+        "maxBetWinPct": { "type": "number" },
+        "tierDecLow": { "type": "number" },
+        "tierDecMid": { "type": "number" },
+        "tierDecHi": { "type": "number" },
+        "tierInt1": { "type": "number" },
+        "tierInt2": { "type": "number" },
+        "tierInt3": { "type": "number" },
+        "tierInt4": { "type": "number" },
+        "tierInt5": { "type": "number" },
+        "prizeDecLowMinUnits": { "type": "integer" },
+        "prizeDecLowMaxUnits": { "type": "integer" },
+        "prizeDecMidMinUnits": { "type": "integer" },
+        "prizeDecMidMaxUnits": { "type": "integer" },
+        "prizeDecHiMinUnits": { "type": "integer" },
+        "prizeDecHiMaxUnits": { "type": "integer" },
+        "prizeInt1Units": { "type": "integer" },
+        "prizeInt2Units": { "type": "integer" },
+        "prizeInt3Units": { "type": "integer" },
+        "prizeInt4Units": { "type": "integer" },
+        "prizeInt5Units": { "type": "integer" },
+        "bettingEnabled": { "type": "boolean" },
+        "bettingStartAt": { "type": "string", "format": "date-time" },
+        "bettingEndAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" }
+      },
+      "required": [
+        "minBetUnits", "maxBetThresholdUnits", "minBetWinPct", "maxBetWinPct",
+        "tierDecLow", "tierDecMid", "tierDecHi",
+        "tierInt1", "tierInt2", "tierInt3", "tierInt4", "tierInt5",
+        "bettingEnabled", "updatedAt", "updatedBy"
+      ]
+    },
+    "StudentGroup": {
+      "title": "StudentGroup",
+      "description": "Grade or classroom group with an independent betting countdown timer.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "bettingEnabled": { "type": "boolean" },
+        "bettingStartAt": { "type": "string", "format": "date-time" },
+        "bettingEndAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" }
+      },
+      "required": ["id", "name", "bettingEnabled", "createdAt", "updatedAt", "updatedBy"]
+    },
+    "RewardItem": {
+      "title": "RewardItem",
+      "description": "Redeemable prize item with editable point cost and stock (-1 = infinite).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "order": { "type": "integer" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 240 },
+        "costUnits": { "type": "integer" },
+        "stock": { "type": "integer" },
+        "active": { "type": "boolean" },
+        "isGrandPrize": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "updatedBy": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" }
+      },
+      "required": ["id", "order", "title", "description", "costUnits", "stock", "active", "isGrandPrize", "updatedAt", "updatedBy"]
+    },
+    "RewardRedemption": {
+      "title": "RewardRedemption",
+      "description": "Student reward redemption record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userName": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "groupId": { "type": "string", "maxLength": 128 },
+        "rewardId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "rewardTitle": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "costUnits": { "type": "integer" },
+        "status": { "type": "string", "enum": ["pending", "delivered"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "userName", "rewardId", "rewardTitle", "costUnits", "status", "createdAt", "updatedAt"]
+    },
+    "UserAccount": {
+      "title": "UserAccount",
+      "description": "Student or administrator profile with isolated PII, group assignment, target reward goal, and integer hundredth-point balance.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "groupId": { "type": "string", "maxLength": 128 },
+        "targetRewardId": { "type": "string", "maxLength": 128 },
+        "balanceUnits": { "type": "integer" },
+        "potUnits": { "type": "integer" },
+        "streak": { "type": "integer" },
+        "totalSpins": { "type": "integer" },
+        "totalWageredUnits": { "type": "integer" },
+        "totalReturnedUnits": { "type": "integer" },
+        "bestPrizeUnits": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "uid", "email", "displayName", "role",
+        "balanceUnits", "potUnits", "streak",
+        "totalSpins", "totalWageredUnits", "totalReturnedUnits", "bestPrizeUnits",
+        "createdAt", "updatedAt"
+      ]
+    },
+    "PointMovement": {
+      "title": "PointMovement",
+      "description": "Immutable ledger record for spins, cashouts, reward redemptions, and administrator point assignments.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "userId": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "type": { "type": "string", "enum": ["spin_win", "spin_loss", "cashout", "admin_grant", "admin_adjust", "reward_redeem"] },
+        "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "subtitle": { "type": "string", "maxLength": 180 },
+        "deltaUnits": { "type": "integer" },
+        "stakeUnits": { "type": "integer" },
+        "winProbPct": { "type": "number" },
+        "createdBy": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "type", "title", "subtitle", "deltaUnits", "stakeUnits", "winProbPct", "createdBy", "createdAt"]
+    },
+    "BlockedUser": {
+      "title": "BlockedUser",
+      "description": "Marker for users removed by the administrator.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "maxLength": 200 },
+        "removedAt": { "type": "string", "format": "date-time" },
+        "removedBy": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" }
+      },
+      "required": ["uid", "email", "removedAt", "removedBy"]
+    },
+    "AdminMarker": {
+      "title": "AdminMarker",
+      "description": "Admin role registry.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/config/game": {
+      "schema": { "$ref": "#/entities/GameConfig" },
+      "description": "Singleton document storing administrator-controlled probabilities, roulette prize amounts, min bet, and default betting window timer."
+    },
+    "/groups/{groupId}": {
+      "schema": { "$ref": "#/entities/StudentGroup" },
+      "description": "Student grade/group configurations with independent betting timers."
+    },
+    "/rewards/{rewardId}": {
+      "schema": { "$ref": "#/entities/RewardItem" },
+      "description": "Catalog of redeemable rewards with editable point prices and stock (-1 = infinite)."
+    },
+    "/redemptions/{redemptionId}": {
+      "schema": { "$ref": "#/entities/RewardRedemption" },
+      "description": "Student reward redemption history."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserAccount" },
+      "description": "Per-user account, group assignment, target reward goal, and point balance document."
+    },
+    "/users/{userId}/movements/{movementId}": {
+      "schema": { "$ref": "#/entities/PointMovement" },
+      "description": "Immutable movement ledger subcollection for each user."
+    },
+    "/blockedUsers/{userId}": {
+      "schema": { "$ref": "#/entities/BlockedUser" },
+      "description": "Tracks users removed by the administrator."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminMarker" },
+      "description": "Admin role registry."
+    }
+  }
+}

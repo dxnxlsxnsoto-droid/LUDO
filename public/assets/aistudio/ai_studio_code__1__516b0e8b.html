@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CONTA CONTA. — Gestión de Riesgo &amp; Puntos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cherry: #890149;
+      --cherry-hover: #6f013b;
+      --cherry-soft: rgba(137, 1, 73, 0.07);
+      --cherry-border: rgba(137, 1, 73, 0.24);
+      --alabaster: #F3F3E7;
+      --alabaster-dark: #E7E7D8;
+      --black: #171717;
+      --black-soft: #4A4A44;
+      --muted: #76766E;
+      --white: #FFFFFF;
+      --border: rgba(23, 23, 23, 0.10);
+      --border-strong: rgba(23, 23, 23, 0.18);
+      --success: #166534;
+      --success-bg: rgba(22, 101, 52, 0.07);
+      --danger: #890149;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: var(--alabaster);
+      color: var(--black);
+      font-family: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .tabular {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Layout */
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 24px 56px;
+    }
+
+    /* Header */
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--black);
+      line-height: 1.1;
+    }
+
+    .brand-title span {
+      color: var(--cherry);
+    }
+
+    .brand-sub {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: inline-flex;
+      background: var(--alabaster-dark);
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+
+    .nav-tab {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--black-soft);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background-color 0.18s ease, color 0.18s ease;
+    }
+
+    .nav-tab:hover {
+      color: var(--black);
+    }
+
+    .nav-tab.active {
+      background: var(--white);
+      color: var(--black);
+      border: 1px solid var(--border);
+    }
+
+    /* Balance Pill */
+    .balance-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .balance-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 16px;
+    }
+
+    .balance-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .balance-value {
+      font-size: 0.98rem;
+      font-weight: 800;
+      color: var(--black);
+    }
+
+    .icon-btn {
+      appearance: none;
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--black-soft);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.18s ease, color 0.18s ease;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--black);
+      color: var(--black);
+    }
+
+    /* Views */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Grid */
+    .operar-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 880px) {
+      .operar-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Card */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--black-soft);
+      background: var(--alabaster);
+    }
+
+    .status-badge.active-round {
+      border-color: var(--cherry-border);
+      background: var(--cherry-soft);
+      color: var(--cherry);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Pot Hero */
+    .hero-stage {
+      padding: 28px 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      background: #FAFAF5;
+      margin-bottom: 24px;
+      transition: border-color 0.25s ease, background-color 0.25s ease;
+    }
+
+    .hero-stage.is-jackpot {
+      border-color: var(--cherry);
+      background: var(--cherry-soft);
+    }
+
+    .hero-stage.is-loss {
+      border-color: var(--border-strong);
+      background: #F7F7F2;
+    }
+
+    .hero-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .hero-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--black-soft);
+    }
+
+    .streak-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .hero-amount {
+      font-size: clamp(2.4rem, 5vw, 3.35rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      color: var(--black);
+      margin-bottom: 14px;
+    }
+
+    .hero-amount span.unit {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0;
+      margin-left: 4px;
+    }
+
+    .hero-feedback {
+      min-height: 24px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--black-soft);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-feedback.win-integer {
+      color: var(--cherry);
+      font-weight: 700;
+    }
+
+    .hero-feedback.win-decimal {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    .hero-feedback.bust {
+      color: var(--cherry);
+      font-weight: 600;
+    }
+
+    /* Risk Split Bar */
+    .risk-bar-wrap {
+      margin-bottom: 24px;
+    }
+
+    .risk-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .risk-bar-labels strong {
+      color: var(--black);
+    }
+
+    .risk-bar {
+      height: 6px;
+      width: 100%;
+      background: var(--alabaster-dark);
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .risk-seg-loss {
+      width: 60%;
+      background: var(--black);
+    }
+
+    .risk-seg-dec {
+      width: 39.5%;
+      background: #B9B9AC;
+    }
+
+    .risk-seg-int {
+      width: 0.5%;
+      min-width: 4px;
+      background: var(--cherry);
+    }
+
+    /* Controls */
+    .bet-section-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--black-soft);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bet-presets {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 520px) {
+      .bet-presets {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .chip-btn {
+      appearance: none;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 8px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--black);
+      cursor: pointer;
+      transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .chip-btn:hover:not(:disabled) {
+      border-color: var(--black);
+    }
+
+    .chip-btn.selected {
+      background: var(--black);
+      border-color: var(--black);
+      color: var(--white);
+    }
+
+    .chip-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .custom-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .custom-input {
+      width: 100%;
+      height: 100%;
+      min-height: 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--black);
+      background: var(--white);
+      outline: none;
+      text-align: center;
+    }
+
+    .custom-input:focus {
+      border-color: var(--cherry);
+    }
+
+    .actions-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .actions-row.split {
+      grid-template-columns: 1.3fr 1fr;
+    }
+
+    @media (max-width: 520px) {
+      .actions-row.split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn {
+      appearance: none;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      padding: 15px 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, opacity 0.16s ease;
+    }
+
+    .btn-primary {
+      background: var(--cherry);
+      border: 1px solid var(--cherry);
+      color: var(--white);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--cherry-hover);
+      border-color: var(--cherry-hover);
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      border: 1px solid var(--black);
+      color: var(--black);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--black);
+      color: var(--white);
+    }
+
+    .btn-subtle {
+      background: var(--alabaster);
+      border: 1px solid var(--border);
+      color: var(--black);
+    }
+
+    .btn-subtle:hover:not(:disabled) {
+      border-color: var(--black);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .recharge-banner {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border: 1px solid var(--cherry-border);
+      background: var(--cherry-soft);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--cherry);
+    }
+
+    /* Right Column KPIs & Ledger */
+    .side-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .kpi-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+
+    .kpi-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .kpi-val {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--black);
+    }
+
+    .kpi-val.accent {
+      color: var(--cherry);
+    }
+
+    /* Ledger */
+    .ledger-list {
+      display: flex;
+      flex-direction: column;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .ledger-empty {
+      padding: 36px 12px;
+      text-align: center;
+      font-size: 0.86rem;
+      color: var(--muted);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md);
+    }
+
+    .ledger-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    .ledger-item:last-child {
+      border-bottom: none;
+    }
+
+    .ledger-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--black-soft);
+      background: #FAFAF5;
+    }
+
+    .ledger-icon.cherry {
+      border-color: var(--cherry-border);
+      background: var(--cherry-soft);
+      color: var(--cherry);
+    }
+
+    .ledger-main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .ledger-title {
+      font-weight: 700;
+      color: var(--black);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ledger-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .ledger-delta {
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .ledger-delta.pos {
+      color: var(--success);
+    }
+
+    .ledger-delta.cherry {
+      color: var(--cherry);
+    }
+
+    .ledger-delta.neg {
+      color: var(--muted);
+    }
+
+    /* Probability Matrix Table */
+    .section-intro {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .section-desc {
+      font-size: 0.92rem;
+      color: var(--black-soft);
+      max-width: 68ch;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table.cc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    table.cc-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-strong);
+    }
+
+    table.cc-table td {
+      padding: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    table.cc-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.cc-table tr.highlight-row {
+      background: var(--cherry-soft);
+    }
+
+    .tier-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--black-soft);
+    }
+
+    .tier-badge.cherry {
+      border-color: var(--cherry-border);
+      color: var(--cherry);
+      background: var(--white);
+    }
+
+    .tier-badge.loss {
+      background: var(--black);
+      border-color: var(--black);
+      color: var(--white);
+    }
+
+    .prob-bar-cell {
+      width: 180px;
+    }
+
+    .prob-track {
+      height: 6px;
+      background: var(--alabaster-dark);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .prob-fill {
+      height: 100%;
+      background: var(--black);
+      border-radius: 999px;
+    }
+
+    .prob-fill.cherry {
+      background: var(--cherry);
+    }
+
+    /* Simulator */
+    .sim-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .sim-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 720px) {
+      .sim-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .footer-sign {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-title">CONTA CONTA<span>.</span></div>
+        <div class="brand-sub">Gestión de Riesgo &amp; Puntos · Guatemala</div>
+      </div>
+
+      <nav class="nav-tabs" aria-label="Vistas principales">
+        <button class="nav-tab active" data-view="operar">Operar</button>
+        <button class="nav-tab" data-view="probabilidades">Probabilidades</button>
+        <button class="nav-tab" data-view="simulador">Simulador</button>
+      </nav>
+
+      <div class="balance-header">
+        <div class="balance-pill">
+          <span class="balance-label">Saldo</span>
+          <span class="balance-value tabular" id="balanceDisplay">10.00 pts</span>
+        </div>
+        <button class="icon-btn" id="resetSessionBtn" title="Reiniciar sesión a 10.00 pts" aria-label="Reiniciar sesión">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW 1: OPERAR -->
+    <main class="view active" id="view-operar">
+      <div class="operar-grid">
+        <!-- Execution Card -->
+        <section class="card">
+          <div class="card-header">
+            <span class="eyebrow">Mesa de Ejecución</span>
+            <span class="status-badge" id="roundBadge">
+              <span class="dot"></span>
+              <span id="roundBadgeText">Listo para operar</span>
+            </span>
+          </div>
+
+          <div class="hero-stage" id="heroStage">
+            <div class="hero-meta">
+              <span class="hero-label" id="heroLabel">Pozo en riesgo</span>
+              <span class="streak-label tabular" id="streakLabel">Racha: 0 tiradas</span>
+            </div>
+            <div class="hero-amount tabular" id="potDisplay">
+              0.00<span class="unit">pts</span>
+            </div>
+            <div class="hero-feedback" id="heroFeedback">
+              Selecciona una apuesta inicial. El 60% de las jugadas pierde todo lo acumulado.
+            </div>
+          </div>
+
+          <!-- Probability Split Indicator -->
+          <div class="risk-bar-wrap">
+            <div class="risk-bar-labels">
+              <span><strong>60.00%</strong> Pérdida total</span>
+              <span><strong>39.50%</strong> Décimas (0.1–0.9)</span>
+              <span><strong style="color: var(--cherry);">0.50%</strong> Enteros (1–5)</span>
+            </div>
+            <div class="risk-bar" aria-hidden="true">
+              <div class="risk-seg-loss"></div>
+              <div class="risk-seg-dec"></div>
+              <div class="risk-seg-int"></div>
+            </div>
+          </div>
+
+          <!-- Bet Selector (visible when pot == 0) -->
+          <div id="betSetupArea">
+            <div class="bet-section-title">
+              <span>Apuesta de entrada</span>
+              <span class="tabular" style="color: var(--muted);">Mín. 0.10 pts</span>
+            </div>
+            <div class="bet-presets">
+              <button class="chip-btn tabular" data-bet="0.10">0.10</button>
+              <button class="chip-btn tabular selected" data-bet="0.20">0.20</button>
+              <button class="chip-btn tabular" data-bet="0.50">0.50</button>
+              <button class="chip-btn tabular" data-bet="1.00">1.00</button>
+              <div class="custom-input-wrap">
+                <input
+                  type="number"
+                  id="customBetInput"
+                  class="custom-input tabular"
+                  placeholder="Otro"
+                  min="0.10"
+                  step="0.10"
+                  aria-label="Apuesta personalizada"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="actions-row" id="actionsRow">
+            <button class="btn btn-primary" id="primaryActionBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
+              <span id="primaryActionText">Apostar 0.20 pts</span>
+            </button>
+            <button class="btn btn-secondary" id="cashoutBtn" style="display: none;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v14" />
+                <path d="m19 9-7 7-7-7" />
+                <path d="M5 20h14" />
+              </svg>
+              <span id="cashoutText">Retirar al saldo</span>
+            </button>
+          </div>
+
+          <div class="recharge-banner" id="rechargeBanner" style="display: none;">
+            <span>Saldo insuficiente para operar (mín. 0.10 pts).</span>
+            <button class="btn btn-primary" id="rechargeBtn" style="padding: 8px 14px; font-size: 0.8rem;">
+              Recargar +10.00 pts
+            </button>
+          </div>
+        </section>
+
+        <!-- Side Stack: KPIs + Ledger -->
+        <aside class="side-stack">
+          <div class="kpi-grid">
+            <div class="kpi-box">
+              <div class="kpi-title">Neto</div>
+              <div class="kpi-val tabular" id="kpiNet">0.00</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-title">Tiradas</div>
+              <div class="kpi-val tabular" id="kpiSpins">0</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-title">Máx. Premio</div>
+              <div class="kpi-val tabular accent" id="kpiBest">0.00</div>
+            </div>
+          </div>
+
+          <section class="card" style="padding: 24px;">
+            <div class="card-header" style="margin-bottom: 16px;">
+              <span class="eyebrow">Libro de Movimientos</span>
+              <span class="streak-label" id="ledgerCount">0 registros</span>
+            </div>
+            <div class="ledger-list" id="ledgerList">
+              <div class="ledger-empty">
+                Sin movimientos registrados aún.<br />Ejecuta una apuesta para iniciar el historial.
+              </div>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+
+    <!-- VIEW 2: PROBABILIDADES -->
+    <section class="view" id="view-probabilidades">
+      <div class="card">
+        <div class="section-intro">
+          <div class="eyebrow" style="margin-bottom: 8px;">Modelo Matemático</div>
+          <h1 class="section-title">Matriz de Probabilidades Exactas</h1>
+          <p class="section-desc">
+            Motor criptográfico uniforme de 10,000 estados discretos (<code>0–9999</code>). La probabilidad de perderlo todo (<strong>60.00%</strong>) supera siempre a la probabilidad conjunta de ganar (<strong>40.00%</strong>). Las ganancias habituales ocurren en décimas de punto, mientras que los enteros del 1 al 5 representan solo el <strong>0.50%</strong> acumulado.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="cc-table">
+            <thead>
+              <tr>
+                <th>Resultado</th>
+                <th>Categoría</th>
+                <th>Probabilidad</th>
+                <th>Frecuencia</th>
+                <th class="prob-bar-cell">Distribución</th>
+              </tr>
+            </thead>
+            <tbody id="probTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: SIMULADOR -->
+    <section class="view" id="view-simulador">
+      <div class="card">
+        <div class="section-intro">
+          <div class="eyebrow" style="margin-bottom: 8px;">Auditoría Empírica</div>
+          <h1 class="section-title">Simulador Estadístico de Monte Carlo</h1>
+          <p class="section-desc">
+            Ejecuta miles de tiradas instantáneas usando exactamente el mismo generador aleatorio de la mesa (sin afectar tu saldo real) para comprobar la frecuencia de las décimas y la escasez real del premio mayor de 5 puntos (0.01%).
+          </p>
+        </div>
+
+        <div class="sim-controls">
+          <button class="btn btn-primary" data-sim="1000">Simular 1,000 tiradas</button>
+          <button class="btn btn-secondary" data-sim="10000">Simular 10,000 tiradas</button>
+          <button class="btn btn-subtle" data-sim="100000">Simular 100,000 tiradas</button>
+        </div>
+
+        <div class="sim-summary-grid" id="simSummaryGrid">
+          <div class="kpi-box">
+            <div class="kpi-title">Muestra</div>
+            <div class="kpi-val tabular" id="simTotal">0</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-title">Pérdidas Totales</div>
+            <div class="kpi-val tabular" id="simLosses">0 (0.00%)</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-title">Enteros (1–5 pts)</div>
+            <div class="kpi-val tabular" id="simIntegers">0 (0.00%)</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-title">Jackpots (5 pts)</div>
+            <div class="kpi-val tabular accent" id="simJackpots">0 (0.00%)</div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="cc-table">
+            <thead>
+              <tr>
+                <th>Resultado</th>
+                <th>Teórico</th>
+                <th>Observado</th>
+                <th>% Real</th>
+              </tr>
+            </thead>
+            <tbody id="simTableBody">
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--muted); padding: 28px;">
+                  Selecciona un volumen de muestra arriba para ejecutar la simulación.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer-sign">
+      <span>CONTA CONTA. · Claridad. Confianza. Control.</span>
+      <span>Motor de Precisión · 10,000 estados discretos</span>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // All point values stored internally as integer hundredths (1.00 pt = 100 units)
+      const STORAGE_KEY = 'conta_conta_points_v1';
+
+      const PROB_TIERS = [
+        { id: 'loss',    label: '0.00 pts (Pierdes todo)', cat: 'Pérdida total',     prob: '60.00%', freq: '3 de cada 5',     pct: 60.00, isLoss: true },
+        { id: 'dec_low', label: '+0.10 a +0.30 pts',       cat: 'Décimas bajas',     prob: '25.00%', freq: '1 de cada 4',     pct: 25.00 },
+        { id: 'dec_mid', label: '+0.40 a +0.60 pts',       cat: 'Décimas medias',    prob: '10.00%', freq: '1 de cada 10',    pct: 10.00 },
+        { id: 'dec_hi',  label: '+0.70 a +0.90 pts',       cat: 'Décimas altas',     prob: '4.50%',  freq: '~1 de cada 22',   pct: 4.50 },
+        { id: 'int_1',   label: '+1.00 punto',             cat: 'Entero base',       prob: '0.35%',  freq: '~1 de cada 286',  pct: 0.35, isCherry: true },
+        { id: 'int_2',   label: '+2.00 puntos',            cat: 'Raro',              prob: '0.09%',  freq: '~1 de cada 1,111', pct: 0.09, isCherry: true },
+        { id: 'int_3',   label: '+3.00 puntos',            cat: 'Muy raro',          prob: '0.03%',  freq: '~1 de cada 3,333', pct: 0.03, isCherry: true },
+        { id: 'int_4',   label: '+4.00 puntos',            cat: 'Épico',             prob: '0.02%',  freq: '1 de cada 5,000', pct: 0.02, isCherry: true },
+        { id: 'int_5',   label: '+5.00 puntos (Mayor)',    cat: 'Premio Mayor',      prob: '0.01%',  freq: '1 de cada 10,000', pct: 0.01, isCherry: true, highlight: true }
+      ];
+
+      // Cryptographically uniform integer in [0, maxExclusive)
+      function secureRandInt(maxExclusive) {
+        const array = new Uint32Array(1);
+        const limit = Math.floor(0x100000000 / maxExclusive) * maxExclusive;
+        let r;
+        do {
+          window.crypto.getRandomValues(array);
+          r = array[0];
+        } while (r >= limit);
+        return r % maxExclusive;
+      }
+
+      // Exact discrete probability roll over 10,000 states (0..9999)
+      function rollOutcome() {
+        const n = secureRandInt(10000);
+        if (n === 0) {
+          return { tierId: 'int_5', units: 500, isLoss: false, isInteger: true, isJackpot: true, desc: 'Premio Mayor · +5.00 pts (0.01%)' };
+        }
+        if (n <= 2) {
+          return { tierId: 'int_4', units: 400, isLoss: false, isInteger: true, isJackpot: false, desc: 'Premio Épico · +4.00 pts (0.02%)' };
+        }
+        if (n <= 5) {
+          return { tierId: 'int_3', units: 300, isLoss: false, isInteger: true, isJackpot: false, desc: 'Premio Muy Raro · +3.00 pts (0.03%)' };
+        }
+        if (n <= 14) {
+          return { tierId: 'int_2', units: 200, isLoss: false, isInteger: true, isJackpot: false, desc: 'Premio Raro · +2.00 pts (0.09%)' };
+        }
+        if (n <= 49) {
+          return { tierId: 'int_1', units: 100, isLoss: false, isInteger: true, isJackpot: false, desc: 'Entero Base · +1.00 pt (0.35%)' };
+        }
+        if (n <= 499) {
+          const vals = [70, 80, 90];
+          const u = vals[secureRandInt(3)];
+          return { tierId: 'dec_hi', units: u, isLoss: false, isInteger: false, isJackpot: false, desc: `Décimas altas · +${formatUnits(u)} pts (4.50%)` };
+        }
+        if (n <= 1499) {
+          const vals = [40, 50, 60];
+          const u = vals[secureRandInt(3)];
+          return { tierId: 'dec_mid', units: u, isLoss: false, isInteger: false, isJackpot: false, desc: `Décimas medias · +${formatUnits(u)} pts (10.00%)` };
+        }
+        if (n <= 3999) {
+          const vals = [10, 20, 30];
+          const u = vals[secureRandInt(3)];
+          return { tierId: 'dec_low', units: u, isLoss: false, isInteger: false, isJackpot: false, desc: `Décimas bajas · +${formatUnits(u)} pts (25.00%)` };
+        }
+        return { tierId: 'loss', units: 0, isLoss: true, isInteger: false, isJackpot: false, desc: 'Pérdida total · Pozo a 0.00 pts (60.00%)' };
+      }
+
+      function formatUnits(units) {
+        return (units / 100).toFixed(2);
+      }
+
+      function defaultState() {
+        return {
+          balance: 1000,       // 10.00 pts
+          pot: 0,
+          roundStake: 0,
+          selectedBet: 20,     // 0.20 pts
+          streak: 0,
+          totalSpins: 0,
+          totalWagered: 0,
+          totalReturned: 0,
+          bestPrize: 0,
+          lastFeedback: 'Selecciona una apuesta inicial. El 60% de las jugadas pierde todo lo acumulado.',
+          lastFeedbackType: 'neutral',
+          ledger: []
+        };
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return defaultState();
+          const parsed = JSON.parse(raw);
+          return Object.assign(defaultState(), parsed);
+        } catch {
+          return defaultState();
+        }
+      }
+
+      let state = loadState();
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch {
+          // ignore storage quota issues
+        }
+      }
+
+      // DOM References
+      const balanceDisplay = document.getElementById('balanceDisplay');
+      const potDisplay = document.getElementById('potDisplay');
+      const heroStage = document.getElementById('heroStage');
+      const heroLabel = document.getElementById('heroLabel');
+      const streakLabel = document.getElementById('streakLabel');
+      const heroFeedback = document.getElementById('heroFeedback');
+      const roundBadge = document.getElementById('roundBadge');
+      const roundBadgeText = document.getElementById('roundBadgeText');
+      const betSetupArea = document.getElementById('betSetupArea');
+      const customBetInput = document.getElementById('customBetInput');
+      const actionsRow = document.getElementById('actionsRow');
+      const primaryActionBtn = document.getElementById('primaryActionBtn');
+      const primaryActionText = document.getElementById('primaryActionText');
+      const cashoutBtn = document.getElementById('cashoutBtn');
+      const cashoutText = document.getElementById('cashoutText');
+      const rechargeBanner = document.getElementById('rechargeBanner');
+      const rechargeBtn = document.getElementById('rechargeBtn');
+      const resetSessionBtn = document.getElementById('resetSessionBtn');
+
+      const kpiNet = document.getElementById('kpiNet');
+      const kpiSpins = document.getElementById('kpiSpins');
+      const kpiBest = document.getElementById('kpiBest');
+      const ledgerList = document.getElementById('ledgerList');
+      const ledgerCount = document.getElementById('ledgerCount');
+
+      const presetBtns = Array.from(document.querySelectorAll('.chip-btn[data-bet]'));
+
+      function addLedgerEntry(entry) {
+        state.ledger.unshift(entry);
+        if (state.ledger.length > 40) state.ledger.length = 40;
+      }
+
+      function renderProbTable() {
+        const tbody = document.getElementById('probTableBody');
+        tbody.innerHTML = PROB_TIERS.map(t => {
+          const badgeClass = t.isLoss ? 'loss' : (t.isCherry ? 'cherry' : '');
+          const fillClass = t.isCherry ? 'cherry' : '';
+          const barWidth = Math.max(t.pct, 0.8);
+          return `
+            <tr class="${t.highlight ? 'highlight-row' : ''}">
+              <td style="font-weight: 700;">${t.label}</td>
+              <td><span class="tier-badge ${badgeClass}">${t.cat}</span></td>
+              <td class="tabular" style="font-weight: 700;">${t.prob}</td>
+              <td style="color: var(--black-soft);">${t.freq}</td>
+              <td class="prob-bar-cell">
+                <div class="prob-track">
+                  <div class="prob-fill ${fillClass}" style="width: ${barWidth}%;"></div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      function render() {
+        balanceDisplay.textContent = `${formatUnits(state.balance)} pts`;
+        potDisplay.innerHTML = `${formatUnits(state.pot)}<span class="unit">pts</span>`;
+        streakLabel.textContent = `Racha: ${state.streak} ${state.streak === 1 ? 'tirada' : 'tiradas'}`;
+
+        // Hero styling
+        heroStage.classList.remove('is-jackpot', 'is-loss');
+        heroFeedback.className = 'hero-feedback';
+        if (state.lastFeedbackType === 'jackpot') {
+          heroStage.classList.add('is-jackpot');
+          heroFeedback.classList.add('win-integer');
+        } else if (state.lastFeedbackType === 'integer') {
+          heroFeedback.classList.add('win-integer');
+        } else if (state.lastFeedbackType === 'decimal') {
+          heroFeedback.classList.add('win-decimal');
+        } else if (state.lastFeedbackType === 'loss') {
+          heroStage.classList.add('is-loss');
+          heroFeedback.classList.add('bust');
+        }
+        heroFeedback.textContent = state.lastFeedback;
+
+        const inRound = state.pot > 0;
+        if (inRound) {
+          roundBadge.classList.add('active-round');
+          roundBadgeText.textContent = 'Ronda en curso';
+          heroLabel.textContent = 'Pozo acumulado en riesgo';
+          betSetupArea.style.display = 'none';
+          actionsRow.classList.add('split');
+          primaryActionText.textContent = `Arriesgar ${formatUnits(state.pot)} pts`;
+          primaryActionBtn.disabled = false;
+          cashoutBtn.style.display = 'inline-flex';
+          cashoutText.textContent = `Retirar ${formatUnits(state.pot)} pts`;
+          rechargeBanner.style.display = 'none';
+        } else {
+          roundBadge.classList.remove('active-round');
+          roundBadgeText.textContent = 'Listo para operar';
+          heroLabel.textContent = 'Pozo en riesgo';
+          betSetupArea.style.display = 'block';
+          actionsRow.classList.remove('split');
+          cashoutBtn.style.display = 'none';
+
+          const validBet = state.selectedBet >= 10 && state.selectedBet <= state.balance;
+          primaryActionText.textContent = `Apostar ${formatUnits(state.selectedBet)} pts`;
+          primaryActionBtn.disabled = !validBet;
+          rechargeBanner.style.display = state.balance < 10 ? 'flex' : 'none';
+        }
+
+        // Preset buttons state
+        presetBtns.forEach(btn => {
+          const valUnits = Math.round(parseFloat(btn.dataset.bet) * 100);
+          btn.classList.toggle('selected', state.selectedBet === valUnits && !customBetInput.value);
+          btn.disabled = valUnits > state.balance;
+        });
+
+        // KPIs
+        const net = state.totalReturned + state.pot - state.totalWagered;
+        const netPrefix = net > 0 ? '+' : '';
+        kpiNet.textContent = `${netPrefix}${formatUnits(net)}`;
+        kpiSpins.textContent = String(state.totalSpins);
+        kpiBest.textContent = formatUnits(state.bestPrize);
+
+        // Ledger
+        ledgerCount.textContent = `${state.ledger.length} ${state.ledger.length === 1 ? 'registro' : 'registros'}`;
+        if (state.ledger.length === 0) {
+          ledgerList.innerHTML = `
+            <div class="ledger-empty">
+              Sin movimientos registrados aún.<br />Ejecuta una apuesta para iniciar el historial.
+            </div>
+          `;
+        } else {
+          ledgerList.innerHTML = state.ledger.map(item => {
+            const isCherry = item.tone === 'cherry';
+            const iconSvg = item.tone === 'loss'
+              ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>'
+              : item.tone === 'cashout'
+                ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5"/></svg>'
+                : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>';
+            const deltaClass = item.tone === 'cherry' ? 'cherry' : (item.tone === 'loss' ? 'neg' : 'pos');
+            return `
+              <div class="ledger-item">
+                <div class="ledger-icon ${isCherry ? 'cherry' : ''}">${iconSvg}</div>
+                <div class="ledger-main">
+                  <div class="ledger-title">${item.title}</div>
+                  <div class="ledger-sub">${item.sub}</div>
+                </div>
+                <div class="ledger-delta tabular ${deltaClass}">${item.delta}</div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        saveState();
+      }
+
+      // Handlers
+      presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          customBetInput.value = '';
+          state.selectedBet = Math.round(parseFloat(btn.dataset.bet) * 100);
+          render();
+        });
+      });
+
+      customBetInput.addEventListener('input', () => {
+        const val = parseFloat(customBetInput.value);
+        if (!Number.isNaN(val) && val > 0) {
+          state.selectedBet = Math.round(val * 100);
+        }
+        render();
+      });
+
+      primaryActionBtn.addEventListener('click', () => {
+        // Start a new round if pot is 0
+        let stakeForSpin = state.pot;
+        let isOpeningSpin = false;
+
+        if (state.pot === 0) {
+          if (state.selectedBet < 10 || state.selectedBet > state.balance) return;
+          state.balance -= state.selectedBet;
+          state.totalWagered += state.selectedBet;
+          state.pot = state.selectedBet;
+          state.roundStake = state.selectedBet;
+          stakeForSpin = state.selectedBet;
+          isOpeningSpin = true;
+        }
+
+        const outcome = rollOutcome();
+        state.totalSpins += 1;
+
+        if (outcome.isLoss) {
+          const lostAmount = state.pot;
+          state.pot = 0;
+          state.streak = 0;
+          state.lastFeedback = `Perdiste todo lo acumulado en la ronda (-${formatUnits(lostAmount)} pts).`;
+          state.lastFeedbackType = 'loss';
+          addLedgerEntry({
+            title: 'Pérdida total (60.00%)',
+            sub: isOpeningSpin ? `Apuesta directa ${formatUnits(lostAmount)} pts` : `Pozo perdido en racha`,
+            delta: `-${formatUnits(lostAmount)} pts`,
+            tone: 'loss'
+          });
+        } else {
+          state.pot += outcome.units;
+          state.streak += 1;
+          if (outcome.units > state.bestPrize) {
+            state.bestPrize = outcome.units;
+          }
+          state.lastFeedback = `${outcome.desc} · Pozo actual: ${formatUnits(state.pot)} pts`;
+          state.lastFeedbackType = outcome.isJackpot ? 'jackpot' : (outcome.isInteger ? 'integer' : 'decimal');
+          addLedgerEntry({
+            title: outcome.isInteger ? `Premio Entero (${formatUnits(outcome.units)} pts)` : `Décimas (+${formatUnits(outcome.units)} pts)`,
+            sub: `En riesgo: ${formatUnits(stakeForSpin)} → ${formatUnits(state.pot)} pts`,
+            delta: `+${formatUnits(outcome.units)} pts`,
+            tone: outcome.isInteger ? 'cherry' : 'pos'
+          });
+        }
+
+        render();
+      });
+
+      cashoutBtn.addEventListener('click', () => {
+        if (state.pot <= 0) return;
+        const cashed = state.pot;
+        state.balance += cashed;
+        state.totalReturned += cashed;
+        state.pot = 0;
+        state.streak = 0;
+        state.lastFeedback = `Retiro asegurado al saldo: +${formatUnits(cashed)} pts.`;
+        state.lastFeedbackType = 'decimal';
+        addLedgerEntry({
+          title: 'Retiro al saldo',
+          sub: 'Ganancia asegurada',
+          delta: `+${formatUnits(cashed)} pts`,
+          tone: 'cashout'
+        });
+        render();
+      });
+
+      rechargeBtn.addEventListener('click', () => {
+        state.balance += 1000;
+        state.lastFeedback = 'Recarga acreditada: +10.00 pts disponibles.';
+        state.lastFeedbackType = 'neutral';
+        addLedgerEntry({
+          title: 'Recarga de simulador',
+          sub: 'Crédito de sesión',
+          delta: '+10.00 pts',
+          tone: 'cashout'
+        });
+        render();
+      });
+
+      resetSessionBtn.addEventListener('click', () => {
+        state = defaultState();
+        customBetInput.value = '';
+        render();
+      });
+
+      // Tabs Navigation
+      const navTabs = document.querySelectorAll('.nav-tab');
+      const views = document.querySelectorAll('.view');
+      navTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const target = tab.dataset.view;
+          navTabs.forEach(t => t.classList.toggle('active', t === tab));
+          views.forEach(v => v.classList.toggle('active', v.id === `view-${target}`));
+        });
+      });
+
+      // Monte Carlo Simulator
+      const simBtns = document.querySelectorAll('[data-sim]');
+      const simTotalEl = document.getElementById('simTotal');
+      const simLossesEl = document.getElementById('simLosses');
+      const simIntegersEl = document.getElementById('simIntegers');
+      const simJackpotsEl = document.getElementById('simJackpots');
+      const simTableBody = document.getElementById('simTableBody');
+
+      function runSimulation(count) {
+        const counts = {};
+        PROB_TIERS.forEach(t => { counts[t.id] = 0; });
+
+        let integers = 0;
+        for (let i = 0; i < count; i++) {
+          const res = rollOutcome();
+          counts[res.tierId] += 1;
+          if (res.isInteger) integers += 1;
+        }
+
+        const losses = counts['loss'];
+        const jackpots = counts['int_5'];
+
+        simTotalEl.textContent = count.toLocaleString('es-GT');
+        simLossesEl.textContent = `${losses.toLocaleString('es-GT')} (${((losses / count) * 100).toFixed(2)}%)`;
+        simIntegersEl.textContent = `${integers.toLocaleString('es-GT')} (${((integers / count) * 100).toFixed(2)}%)`;
+        simJackpotsEl.textContent = `${jackpots.toLocaleString('es-GT')} (${((jackpots / count) * 100).toFixed(3)}%)`;
+
+        simTableBody.innerHTML = PROB_TIERS.map(t => {
+          const obs = counts[t.id];
+          const realPct = ((obs / count) * 100).toFixed(t.pct < 0.1 ? 3 : 2);
+          return `
+            <tr class="${t.highlight ? 'highlight-row' : ''}">
+              <td style="font-weight: 700;">${t.label}</td>
+              <td class="tabular" style="color: var(--muted);">${t.prob}</td>
+              <td class="tabular" style="font-weight: 700;">${obs.toLocaleString('es-GT')}</td>
+              <td class="tabular" style="font-weight: 700; ${t.isCherry ? 'color: var(--cherry);' : ''}">${realPct}%</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      simBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          runSimulation(parseInt(btn.dataset.sim, 10));
+        });
+      });
+
+      // Init
+      renderProbTable();
+      render();
+    })();
+  </script>
+</body>
+</html>

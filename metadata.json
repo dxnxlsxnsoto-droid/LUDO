@@ -1,0 +1,8 @@
+{
+  "name": "CONTA CONTA. — Gestión de Riesgo & Puntos",
+  "description": "Plataforma de gestión de riesgo y puntos con consola de administrador, ruleta 2D sincronizada en tiempo real y control de probabilidades.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

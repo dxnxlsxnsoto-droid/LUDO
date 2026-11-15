@@ -1,0 +1,397 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net: deny all reads and writes by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isVerified() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isVerified() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == 'dxnxlsxnsoto@gmail.com' && request.auth.token.email_verified == true)
+      );
+    }
+
+    function maxNum(a, b) {
+      return a >= b ? a : b;
+    }
+
+    function isValidGameConfig(data) {
+      return data.keys().hasAll([
+        'minBetUnits', 'maxBetThresholdUnits', 'minBetWinPct', 'maxBetWinPct',
+        'tierDecLow', 'tierDecMid', 'tierDecHi',
+        'tierInt1', 'tierInt2', 'tierInt3', 'tierInt4', 'tierInt5',
+        'bettingEnabled', 'updatedAt', 'updatedBy'
+      ]) &&
+      data.keys().hasOnly([
+        'minBetUnits', 'maxBetThresholdUnits', 'minBetWinPct', 'maxBetWinPct',
+        'tierDecLow', 'tierDecMid', 'tierDecHi',
+        'tierInt1', 'tierInt2', 'tierInt3', 'tierInt4', 'tierInt5',
+        'prizeDecLowMinUnits', 'prizeDecLowMaxUnits',
+        'prizeDecMidMinUnits', 'prizeDecMidMaxUnits',
+        'prizeDecHiMinUnits', 'prizeDecHiMaxUnits',
+        'prizeInt1Units', 'prizeInt2Units', 'prizeInt3Units', 'prizeInt4Units', 'prizeInt5Units',
+        'bettingEnabled', 'bettingStartAt', 'bettingEndAt', 'updatedAt', 'updatedBy'
+      ]) &&
+      data.minBetUnits is int && data.minBetUnits >= 1 && data.minBetUnits <= 100000 &&
+      data.maxBetThresholdUnits is int && data.maxBetThresholdUnits >= data.minBetUnits && data.maxBetThresholdUnits <= 1000000 &&
+      data.minBetWinPct is number && data.minBetWinPct >= 0 && data.minBetWinPct <= 100 &&
+      data.maxBetWinPct is number && data.maxBetWinPct >= 0 && data.maxBetWinPct <= 100 &&
+      data.tierDecLow is number && data.tierDecLow >= 0 && data.tierDecLow <= 100 &&
+      data.tierDecMid is number && data.tierDecMid >= 0 && data.tierDecMid <= 100 &&
+      data.tierDecHi is number && data.tierDecHi >= 0 && data.tierDecHi <= 100 &&
+      data.tierInt1 is number && data.tierInt1 >= 0 && data.tierInt1 <= 100 &&
+      data.tierInt2 is number && data.tierInt2 >= 0 && data.tierInt2 <= 100 &&
+      data.tierInt3 is number && data.tierInt3 >= 0 && data.tierInt3 <= 100 &&
+      data.tierInt4 is number && data.tierInt4 >= 0 && data.tierInt4 <= 100 &&
+      data.tierInt5 is number && data.tierInt5 >= 0 && data.tierInt5 <= 100 &&
+      (!('prizeDecLowMinUnits' in data) || (data.prizeDecLowMinUnits is int && data.prizeDecLowMinUnits >= 1 && data.prizeDecLowMinUnits <= 100000)) &&
+      (!('prizeDecLowMaxUnits' in data) || (data.prizeDecLowMaxUnits is int && data.prizeDecLowMaxUnits >= 1 && data.prizeDecLowMaxUnits <= 100000)) &&
+      (!('prizeDecMidMinUnits' in data) || (data.prizeDecMidMinUnits is int && data.prizeDecMidMinUnits >= 1 && data.prizeDecMidMinUnits <= 100000)) &&
+      (!('prizeDecMidMaxUnits' in data) || (data.prizeDecMidMaxUnits is int && data.prizeDecMidMaxUnits >= 1 && data.prizeDecMidMaxUnits <= 100000)) &&
+      (!('prizeDecHiMinUnits' in data) || (data.prizeDecHiMinUnits is int && data.prizeDecHiMinUnits >= 1 && data.prizeDecHiMinUnits <= 100000)) &&
+      (!('prizeDecHiMaxUnits' in data) || (data.prizeDecHiMaxUnits is int && data.prizeDecHiMaxUnits >= 1 && data.prizeDecHiMaxUnits <= 100000)) &&
+      (!('prizeInt1Units' in data) || (data.prizeInt1Units is int && data.prizeInt1Units >= 1 && data.prizeInt1Units <= 100000)) &&
+      (!('prizeInt2Units' in data) || (data.prizeInt2Units is int && data.prizeInt2Units >= 1 && data.prizeInt2Units <= 100000)) &&
+      (!('prizeInt3Units' in data) || (data.prizeInt3Units is int && data.prizeInt3Units >= 1 && data.prizeInt3Units <= 100000)) &&
+      (!('prizeInt4Units' in data) || (data.prizeInt4Units is int && data.prizeInt4Units >= 1 && data.prizeInt4Units <= 100000)) &&
+      (!('prizeInt5Units' in data) || (data.prizeInt5Units is int && data.prizeInt5Units >= 1 && data.prizeInt5Units <= 100000)) &&
+      data.bettingEnabled is bool &&
+      (!('bettingStartAt' in data) || data.bettingStartAt == null || data.bettingStartAt is timestamp) &&
+      (!('bettingEndAt' in data) || data.bettingEndAt == null || data.bettingEndAt is timestamp) &&
+      data.updatedAt is timestamp && data.updatedAt == request.time &&
+      data.updatedBy is string && data.updatedBy.size() >= 1 && data.updatedBy.size() <= 128 && data.updatedBy == request.auth.uid;
+    }
+
+    function isValidGroup(data, groupId) {
+      return data.keys().hasAll([
+        'id', 'name', 'bettingEnabled', 'createdAt', 'updatedAt', 'updatedBy'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'name', 'bettingEnabled', 'bettingStartAt', 'bettingEndAt', 'createdAt', 'updatedAt', 'updatedBy'
+      ]) &&
+      data.id is string && data.id == groupId && isValidId(data.id) &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+      data.bettingEnabled is bool &&
+      (!('bettingStartAt' in data) || data.bettingStartAt == null || data.bettingStartAt is timestamp) &&
+      (!('bettingEndAt' in data) || data.bettingEndAt == null || data.bettingEndAt is timestamp) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp && data.updatedAt == request.time &&
+      data.updatedBy is string && data.updatedBy.size() >= 1 && data.updatedBy.size() <= 128 && data.updatedBy == request.auth.uid;
+    }
+
+    function isValidReward(data, rewardId) {
+      return data.keys().hasAll([
+        'id', 'order', 'title', 'description', 'costUnits', 'stock', 'active', 'isGrandPrize', 'updatedAt', 'updatedBy'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'order', 'title', 'description', 'costUnits', 'stock', 'active', 'isGrandPrize', 'updatedAt', 'updatedBy'
+      ]) &&
+      data.id is string && data.id == rewardId && isValidId(data.id) &&
+      data.order is int && data.order >= 1 && data.order <= 500 &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 100 &&
+      data.description is string && data.description.size() <= 240 &&
+      data.costUnits is int && data.costUnits >= 1 && data.costUnits <= 100000000 &&
+      data.stock is int && data.stock >= -1 && data.stock <= 1000000 &&
+      data.active is bool &&
+      data.isGrandPrize is bool &&
+      data.updatedAt is timestamp && data.updatedAt == request.time &&
+      data.updatedBy is string && data.updatedBy.size() >= 1 && data.updatedBy.size() <= 128;
+    }
+
+    function isValidRedemption(data, redemptionId) {
+      return data.keys().hasAll([
+        'id', 'userId', 'userName', 'rewardId', 'rewardTitle', 'costUnits', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'userId', 'userName', 'groupId', 'rewardId', 'rewardTitle', 'costUnits', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.id is string && data.id == redemptionId && isValidId(data.id) &&
+      data.userId is string && isValidId(data.userId) &&
+      data.userName is string && data.userName.size() >= 1 && data.userName.size() <= 80 &&
+      (!('groupId' in data) || data.groupId == null || (data.groupId is string && data.groupId.size() <= 128)) &&
+      data.rewardId is string && isValidId(data.rewardId) &&
+      data.rewardTitle is string && data.rewardTitle.size() >= 1 && data.rewardTitle.size() <= 100 &&
+      data.costUnits is int && data.costUnits >= 1 && data.costUnits <= 100000000 &&
+      data.status in ['pending', 'delivered'] &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
+    function isValidUserAccount(data) {
+      return data.keys().hasAll([
+        'uid', 'email', 'displayName', 'role',
+        'balanceUnits', 'potUnits', 'streak',
+        'totalSpins', 'totalWageredUnits', 'totalReturnedUnits', 'bestPrizeUnits',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'uid', 'email', 'displayName', 'role', 'groupId', 'targetRewardId',
+        'balanceUnits', 'potUnits', 'streak',
+        'totalSpins', 'totalWageredUnits', 'totalReturnedUnits', 'bestPrizeUnits',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 && data.uid.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+      data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+      data.role in ['student', 'admin'] &&
+      (!('groupId' in data) || data.groupId == null || (data.groupId is string && data.groupId.size() <= 128)) &&
+      (!('targetRewardId' in data) || data.targetRewardId == null || (data.targetRewardId is string && data.targetRewardId.size() <= 128)) &&
+      data.balanceUnits is int && data.balanceUnits >= 0 && data.balanceUnits <= 100000000 &&
+      data.potUnits is int && data.potUnits >= 0 && data.potUnits <= 100000000 &&
+      data.streak is int && data.streak >= 0 && data.streak <= 100000 &&
+      data.totalSpins is int && data.totalSpins >= 0 && data.totalSpins <= 10000000 &&
+      data.totalWageredUnits is int && data.totalWageredUnits >= 0 &&
+      data.totalReturnedUnits is int && data.totalReturnedUnits >= 0 &&
+      data.bestPrizeUnits is int && data.bestPrizeUnits >= 0 && data.bestPrizeUnits <= 1000000 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp && data.updatedAt == request.time;
+    }
+
+    function isValidMovement(data, userId, movementId) {
+      return data.keys().hasAll([
+        'id', 'userId', 'type', 'title', 'subtitle',
+        'deltaUnits', 'stakeUnits', 'winProbPct', 'createdBy', 'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'id', 'userId', 'type', 'title', 'subtitle',
+        'deltaUnits', 'stakeUnits', 'winProbPct', 'createdBy', 'createdAt'
+      ]) &&
+      data.id is string && data.id == movementId && isValidId(data.id) &&
+      data.userId is string && data.userId == userId && isValidId(data.userId) &&
+      data.type in ['spin_win', 'spin_loss', 'cashout', 'admin_grant', 'admin_adjust', 'reward_redeem'] &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+      data.subtitle is string && data.subtitle.size() <= 180 &&
+      data.deltaUnits is int && data.deltaUnits >= -100000000 && data.deltaUnits <= 100000000 &&
+      data.stakeUnits is int && data.stakeUnits >= 0 && data.stakeUnits <= 100000000 &&
+      data.winProbPct is number && data.winProbPct >= 0 && data.winProbPct <= 100 &&
+      data.createdBy is string && data.createdBy.size() >= 1 && data.createdBy.size() <= 128 && data.createdBy == request.auth.uid &&
+      data.createdAt is timestamp && data.createdAt == request.time;
+    }
+
+    function isValidBlockedUser(data, userId) {
+      return data.keys().hasAll(['uid', 'email', 'removedAt', 'removedBy']) &&
+      data.keys().hasOnly(['uid', 'email', 'removedAt', 'removedBy']) &&
+      data.uid is string && data.uid == userId && isValidId(data.uid) &&
+      data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+      data.removedAt is timestamp && data.removedAt == request.time &&
+      data.removedBy is string && data.removedBy.size() >= 1 && data.removedBy.size() <= 128 && data.removedBy == request.auth.uid;
+    }
+
+    function isValidAdminMarker(data, adminId) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt']) &&
+      data.keys().hasOnly(['uid', 'email', 'createdAt']) &&
+      data.uid is string && data.uid == adminId && isValidId(data.uid) &&
+      data.email is string && data.email.size() >= 3 && data.email.size() <= 200 &&
+      data.createdAt is timestamp && data.createdAt == request.time;
+    }
+
+    function maxConfiguredSpinPrize() {
+      let cfg = get(/databases/$(database)/documents/config/game).data;
+      let dMax = maxNum(
+        maxNum('prizeDecLowMaxUnits' in cfg ? cfg.prizeDecLowMaxUnits : 30, 'prizeDecMidMaxUnits' in cfg ? cfg.prizeDecMidMaxUnits : 60),
+        'prizeDecHiMaxUnits' in cfg ? cfg.prizeDecHiMaxUnits : 90
+      );
+      let iMax12 = maxNum('prizeInt1Units' in cfg ? cfg.prizeInt1Units : 100, 'prizeInt2Units' in cfg ? cfg.prizeInt2Units : 200);
+      let iMax34 = maxNum('prizeInt3Units' in cfg ? cfg.prizeInt3Units : 300, 'prizeInt4Units' in cfg ? cfg.prizeInt4Units : 400);
+      let iMax = maxNum(maxNum(iMax12, iMax34), 'prizeInt5Units' in cfg ? cfg.prizeInt5Units : 500);
+      return maxNum(dMax, iMax);
+    }
+
+    function isSpinAction() {
+      return incoming().diff(existing()).affectedKeys().hasOnly([
+        'balanceUnits', 'potUnits', 'streak', 'totalSpins',
+        'totalWageredUnits', 'bestPrizeUnits', 'updatedAt'
+      ]) &&
+      incoming().totalSpins == existing().totalSpins + 1 &&
+      incoming().balanceUnits <= existing().balanceUnits &&
+      incoming().potUnits <= existing().potUnits + (existing().balanceUnits - incoming().balanceUnits) + maxConfiguredSpinPrize();
+    }
+
+    function isCashoutAction() {
+      return incoming().diff(existing()).affectedKeys().hasOnly([
+        'balanceUnits', 'potUnits', 'streak', 'totalReturnedUnits', 'updatedAt'
+      ]) &&
+      existing().potUnits > 0 &&
+      incoming().potUnits == 0 &&
+      incoming().streak == 0 &&
+      incoming().balanceUnits == existing().balanceUnits + existing().potUnits &&
+      incoming().totalReturnedUnits == existing().totalReturnedUnits + existing().potUnits;
+    }
+
+    function isRedeemAction() {
+      return incoming().diff(existing()).affectedKeys().hasOnly(['balanceUnits', 'updatedAt']) &&
+      incoming().balanceUnits < existing().balanceUnits &&
+      incoming().balanceUnits >= 0;
+    }
+
+    function isSelectTargetRewardAction() {
+      return incoming().diff(existing()).affectedKeys().hasOnly(['targetRewardId', 'updatedAt']);
+    }
+
+    function isProfileNameUpdateAction() {
+      return incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'updatedAt']);
+    }
+
+    // Global Game Config singleton
+    match /config/{configId} {
+      allow get: if isValidId(configId) && configId == 'game' && isVerified();
+      allow list: if false;
+      allow create, update: if isValidId(configId) && configId == 'game' && isAdmin() && isValidGameConfig(incoming());
+      allow delete: if false;
+    }
+
+    // Student Groups (Grades) & per-group timers
+    match /groups/{groupId} {
+      allow get: if isValidId(groupId) && isVerified();
+      allow list: if isVerified();
+      allow create: if isValidId(groupId) && isAdmin() && isValidGroup(incoming(), groupId) && incoming().createdAt == request.time;
+      allow update: if isValidId(groupId) && isAdmin() && isValidGroup(incoming(), groupId) && incoming().createdAt == existing().createdAt;
+      allow delete: if isValidId(groupId) && isAdmin();
+    }
+
+    // Redeemable Rewards Catalog (supports stock: -1 = infinite)
+    match /rewards/{rewardId} {
+      allow get: if isValidId(rewardId) && isVerified();
+      allow list: if isVerified();
+      allow create: if isValidId(rewardId) && isAdmin() && isValidReward(incoming(), rewardId) && incoming().updatedBy == request.auth.uid;
+      allow update: if isValidId(rewardId) && isVerified() && isValidReward(incoming(), rewardId) && (
+        (isAdmin() && incoming().updatedBy == request.auth.uid) ||
+        (
+          existing().active == true &&
+          existing().stock > 0 &&
+          incoming().stock == existing().stock - 1 &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['stock', 'updatedAt'])
+        )
+      );
+      allow delete: if isValidId(rewardId) && isAdmin();
+    }
+
+    // Reward Redemptions
+    match /redemptions/{redemptionId} {
+      allow get: if isValidId(redemptionId) && isVerified() && (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isAdmin() || (isVerified() && existing().userId == request.auth.uid);
+      allow create: if isValidId(redemptionId) &&
+        isVerified() &&
+        isValidRedemption(incoming(), redemptionId) &&
+        incoming().userId == request.auth.uid &&
+        incoming().status == 'pending' &&
+        incoming().createdAt == request.time &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        exists(/databases/$(database)/documents/rewards/$(incoming().rewardId));
+      allow update: if isValidId(redemptionId) &&
+        isAdmin() &&
+        isValidRedemption(incoming(), redemptionId) &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+      allow delete: if isValidId(redemptionId) && isAdmin();
+    }
+
+    // Blocked / Removed Users registry
+    match /blockedUsers/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(userId) && isAdmin() && isValidBlockedUser(incoming(), userId);
+      allow update: if false;
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    // Users collection (strict PII isolation)
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+
+      allow create: if isValidId(userId) &&
+        isVerified() &&
+        isValidUserAccount(incoming()) &&
+        incoming().uid == userId &&
+        incoming().createdAt == request.time &&
+        !exists(/databases/$(database)/documents/blockedUsers/$(userId)) &&
+        (
+          (
+            request.auth.uid == userId &&
+            incoming().role == 'student' &&
+            incoming().balanceUnits == 0 &&
+            incoming().potUnits == 0 &&
+            incoming().streak == 0 &&
+            incoming().totalSpins == 0 &&
+            incoming().totalWageredUnits == 0 &&
+            incoming().totalReturnedUnits == 0 &&
+            incoming().bestPrizeUnits == 0
+          ) ||
+          isAdmin()
+        );
+
+      allow update: if isValidId(userId) &&
+        isVerified() &&
+        isValidUserAccount(incoming()) &&
+        incoming().uid == existing().uid &&
+        incoming().email == existing().email &&
+        incoming().createdAt == existing().createdAt &&
+        (
+          (
+            isAdmin() &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['balanceUnits', 'displayName', 'role', 'groupId', 'updatedAt'])
+          ) ||
+          (
+            isOwner(userId) &&
+            incoming().role == existing().role &&
+            (isSpinAction() || isCashoutAction() || isRedeemAction() || isSelectTargetRewardAction() || isProfileNameUpdateAction())
+          )
+        );
+
+      allow delete: if isValidId(userId) && isAdmin();
+
+      match /movements/{movementId} {
+        allow get: if isValidId(userId) && isValidId(movementId) && (isOwner(userId) || isAdmin());
+        allow list: if isValidId(userId) && (isOwner(userId) || isAdmin());
+
+        allow create: if isValidId(userId) &&
+          isValidId(movementId) &&
+          isVerified() &&
+          isValidMovement(incoming(), userId, movementId) &&
+          exists(/databases/$(database)/documents/users/$(userId)) &&
+          (
+            (isOwner(userId) && incoming().type in ['spin_win', 'spin_loss', 'cashout', 'reward_redeem']) ||
+            (isAdmin() && incoming().type in ['admin_grant', 'admin_adjust'])
+          );
+
+        allow update, delete: if false;
+      }
+    }
+
+    // Admin registry
+    match /admins/{adminId} {
+      allow get: if isValidId(adminId) && (isOwner(adminId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(adminId) && isAdmin() && isValidAdminMarker(incoming(), adminId);
+      allow update, delete: if false;
+    }
+  }
+}
